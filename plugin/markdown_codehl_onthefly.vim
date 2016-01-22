@@ -17,6 +17,8 @@ augroup markdown_codehl_onthefly
     \   call markdown_codehl_onthefly#do_syn_include_after()
     autocmd InsertLeave *
     \   call markdown_codehl_onthefly#syn_include_dynamically()
+    autocmd BufLeave *
+    \   call markdown_codehl_onthefly#restore_markdown_fenced_languages()
 augroup END
 
 
