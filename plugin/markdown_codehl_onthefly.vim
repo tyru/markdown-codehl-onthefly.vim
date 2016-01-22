@@ -1,9 +1,9 @@
 scriptencoding utf-8
 
-if exists('g:loaded_stoptypofile')
+if exists('g:loaded_markdown_codehl_onthefly')
   finish
 endif
-let g:loaded_stoptypofile = 1
+let g:loaded_markdown_codehl_onthefly = 1
 
 let s:save_cpo = &cpo
 set cpo&vim
