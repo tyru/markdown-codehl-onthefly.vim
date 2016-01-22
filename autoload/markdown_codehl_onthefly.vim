@@ -3,17 +3,11 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 
-" let g:markdown_fenced_languages =
-" \   map(globpath(&rtp, 'syntax/*', 1, 1), 'fnamemodify(v:val, ":t:r")')
+let g:markdown_codehl_onthefly#additional_fenced_languages =
+\   get(g:, 'markdown_codehl_onthefly#additional_fenced_languages', [
+\           'viml=vim'
+\])
 
-" let g:markdown_fenced_languages =
-" \   map(globpath(&rtp, 'syntax/*/', 1, 1) +
-" \           globpath(&rtp, 'syntax/*.vim', 1, 1),
-" \       'fnamemodify(v:val, ":t:r")')
-
-" let g:markdown_fenced_languages = []
-" let s:additionals = ['javascript', 'vim', 'viml=vim']
-let s:additionals = []
 let s:do_syn_include_after = 0
 
 function! markdown_codehl_onthefly#set_fenced_langs() abort
@@ -24,7 +18,8 @@ function! markdown_codehl_onthefly#set_fenced_langs() abort
         let g:markdown_fenced_languages = []
     endif
     let g:markdown_fenced_languages =
-    \   s:get_using_inline_filetypes() + s:additionals
+    \   s:get_using_inline_filetypes() +
+    \   g:markdown_codehl_onthefly#additional_fenced_languages
 endfunction
 
 function! markdown_codehl_onthefly#do_syn_include_after() abort
@@ -40,7 +35,8 @@ function! markdown_codehl_onthefly#syn_include_dynamically() abort
     endif
     try
         let added = 0
-        for filetype in s:get_using_inline_filetypes() + s:additionals
+        for filetype in s:get_using_inline_filetypes() +
+        \   g:markdown_codehl_onthefly#additional_fenced_languages
             let group = 'markdownHighlight' . filetype
             if match(g:markdown_fenced_languages,
             \       '\(^\|=\)'.filetype.'$') ==# -1
