@@ -5,7 +5,8 @@ set cpo&vim
 
 let g:markdown_codehl_onthefly#additional_fenced_languages =
 \   get(g:, 'markdown_codehl_onthefly#additional_fenced_languages', [
-\           'viml=vim'
+\           'viml=vim',
+\           'bash=sh'
 \])
 
 let s:do_syn_include_after = 0
