@@ -9,16 +9,10 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 
-augroup markdown_codehl_onthefly
+augroup markdown_codehl_onthefly-bootstrap
     autocmd!
     autocmd FileType markdown
-    \   call markdown_codehl_onthefly#set_fenced_langs()
-    autocmd TextChanged,TextChangedI *
-    \   call markdown_codehl_onthefly#do_syn_include_after()
-    autocmd InsertLeave *
-    \   call markdown_codehl_onthefly#syn_include_dynamically()
-    autocmd BufLeave *
-    \   call markdown_codehl_onthefly#restore_markdown_fenced_languages()
+    \   call markdown_codehl_onthefly#start()
 augroup END
 
 

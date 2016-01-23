@@ -9,44 +9,77 @@ let g:markdown_codehl_onthefly#additional_fenced_languages =
 \           'bash=sh'
 \])
 
+let s:NONE = []
 let s:do_syn_include_after = 0
 
 
-function! markdown_codehl_onthefly#set_fenced_langs() abort
+function! markdown_codehl_onthefly#start() abort
     if &filetype !=# 'markdown'
         return
     endif
+    " Save current g:markdown_fenced_languages
     call s:save_markdown_fenced_languages()
-    if !exists('g:markdown_fenced_languages')
-        let g:markdown_fenced_languages = []
-    endif
-    let g:markdown_fenced_languages =
+    " Change g:markdown_fenced_languages (buffer-local)
+    call s:set_markdown_fenced_languages(
     \   s:get_using_inline_filetypes() +
-    \   g:markdown_codehl_onthefly#additional_fenced_languages
+    \   g:markdown_codehl_onthefly#additional_fenced_languages)
+    " Register auto-commands (buffer-local)
+    augroup markdown_codehl_onthefly-buflocal
+        autocmd!
+        autocmd TextChanged,TextChangedI <buffer>
+        \   let s:do_syn_include_after = 1
+        autocmd InsertLeave <buffer>
+        \   call s:syn_include_dynamically()
+        autocmd BufEnter <buffer>
+        \   call s:restore_buflocal_markdown_fenced_languages()
+        autocmd BufLeave <buffer>
+        \   call s:restore_markdown_fenced_languages()
+    augroup END
 endfunction
 
+" Save current g:markdown_fenced_languages
+" before changing g:markdown_fenced_languages.
+" @seealso s:restore_markdown_fenced_languages()
 function! s:save_markdown_fenced_languages() abort
     if !exists('g:markdown_fenced_languages')
-        return
+        let b:markdown_codehl_onthefly_prev_markdown_fenced_languages =
+        \   s:NONE
+    else
+        let b:markdown_codehl_onthefly_prev_markdown_fenced_languages =
+        \   g:markdown_fenced_languages
     endif
-    " Tooooo loooooooooooooooong
-    let b:markdown_codehl_onthefly_markdown_fenced_languages =
-    \       g:markdown_fenced_languages
 endfunction
 
-function! markdown_codehl_onthefly#restore_markdown_fenced_languages() abort
-    if !exists('b:markdown_codehl_onthefly_markdown_fenced_languages')
-        return
+" Restore original g:markdown_fenced_languages
+" before entering markdown buffer.
+" @seealso s:save_markdown_fenced_languages()
+function! s:restore_markdown_fenced_languages() abort
+    if b:markdown_codehl_onthefly_prev_markdown_fenced_languages is s:NONE
+        unlet g:markdown_fenced_languages
+    else
+        let g:markdown_fenced_languages =
+        \   b:markdown_codehl_onthefly_prev_markdown_fenced_languages
     endif
-    let g:markdown_fenced_languages =
-    \   b:markdown_codehl_onthefly_markdown_fenced_languages
 endfunction
 
-function! markdown_codehl_onthefly#do_syn_include_after() abort
-    let s:do_syn_include_after = 1
+" Set g:markdown_fenced_languages when entering markdown buffer.
+" @seealso s:restore_buflocal_markdown_fenced_languages()
+function! s:set_markdown_fenced_languages(langs) abort
+    let g:markdown_fenced_languages = copy(a:langs)
+    let b:markdown_codehl_onthefly_buflocal_markdown_fenced_languages =
+    \   copy(a:langs)
 endfunction
 
-function! markdown_codehl_onthefly#syn_include_dynamically() abort
+" Set g:markdown_fenced_languages when entering markdown buffer.
+" @seealso s:set_markdown_fenced_languages()
+function! s:restore_buflocal_markdown_fenced_languages() abort
+    if exists('b:markdown_codehl_onthefly_buflocal_markdown_fenced_languages')
+        let g:markdown_fenced_languages =
+        \   b:markdown_codehl_onthefly_buflocal_markdown_fenced_languages
+    endif
+endfunction
+
+function! s:syn_include_dynamically() abort
     if !s:do_syn_include_after
         return
     endif
@@ -55,12 +88,13 @@ function! markdown_codehl_onthefly#syn_include_dynamically() abort
     endif
     try
         let added = 0
-        for filetype in s:get_using_inline_filetypes() +
-        \   g:markdown_codehl_onthefly#additional_fenced_languages
+        for filetype in s:get_using_inline_filetypes()
             let group = 'markdownHighlight' . filetype
             if match(g:markdown_fenced_languages,
             \       '\(^\|=\)'.filetype.'$') ==# -1
-                let g:markdown_fenced_languages += [filetype]
+                call s:set_markdown_fenced_languages(
+                \   g:markdown_fenced_languages + [filetype]
+                \)
                 let added = 1
             endif
         endfor
