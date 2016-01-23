@@ -3,11 +3,29 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 
-let g:markdown_codehl_onthefly#additional_fenced_languages =
-\   get(g:, 'markdown_codehl_onthefly#additional_fenced_languages', [
-\           'viml=vim',
-\           'bash=sh'
-\])
+if !exists('g:markdown_codehl_onthefly#additional_fenced_languages')
+    let g:markdown_codehl_onthefly#additional_fenced_languages = []
+    " From linguist's languages.yml
+    " https://github.com/github/linguist/blob/master/lib/linguist/languages.yml
+    for [alias, to] in [
+    \   ['viml', 'vim'],
+    \   ['nvim', 'vim'],
+    \   ['bash', 'sh'],
+    \   ['zsh', 'sh'],
+    \   ['rusthon', 'python'],
+    \   ['jruby', 'ruby'],
+    \   ['macruby', 'ruby'],
+    \   ['rake', 'ruby'],
+    \   ['rb', 'ruby'],
+    \   ['rbx', 'ruby'],
+    \]
+        " If <alias>.vim is not installed, add to additional languages.
+        if globpath(&rtp, 'syntax/' . alias . '.vim') ==# ''
+            let g:markdown_codehl_onthefly#additional_fenced_languages +=
+            \   [alias . '=' . to]
+        endif
+    endfor
+endif
 
 let s:NONE = []
 let s:do_syn_include_after = 0
