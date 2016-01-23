@@ -46,7 +46,7 @@ function! markdown_codehl_onthefly#start() abort
         autocmd!
         autocmd TextChanged,TextChangedI <buffer>
         \   let s:do_syn_include_after = 1
-        autocmd InsertLeave <buffer>
+        autocmd InsertLeave,CursorHoldI,CursorHold <buffer>
         \   call s:syn_include_dynamically()
         autocmd BufEnter <buffer>
         \   call s:restore_buflocal_markdown_fenced_languages()
