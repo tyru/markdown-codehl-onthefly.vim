@@ -91,7 +91,7 @@ function! s:syn_include_dynamically() abort
         for filetype in s:get_using_inline_filetypes()
             let group = 'markdownHighlight' . filetype
             if match(g:markdown_fenced_languages,
-            \       '\(^\|=\)'.filetype.'$') ==# -1
+            \       '^'.filetype.'\($\|=\)') ==# -1
                 call s:set_markdown_fenced_languages(
                 \   g:markdown_fenced_languages + [filetype]
                 \)
