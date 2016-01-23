@@ -18,6 +18,9 @@ if !exists('g:markdown_codehl_onthefly#additional_fenced_languages')
     \   ['rake', 'ruby'],
     \   ['rb', 'ruby'],
     \   ['rbx', 'ruby'],
+    \   ['json', 'javascript'],
+    \   ['js', 'javascript'],
+    \   ['node', 'javascript'],
     \]
         " If <alias>.vim is not installed, add to additional languages.
         if globpath(&rtp, 'syntax/' . alias . '.vim') ==# ''
