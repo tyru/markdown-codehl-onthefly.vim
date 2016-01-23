@@ -38,9 +38,9 @@ function! markdown_codehl_onthefly#start() abort
     " Save current g:markdown_fenced_languages
     call s:save_markdown_fenced_languages()
     " Change g:markdown_fenced_languages (buffer-local)
-    call s:set_markdown_fenced_languages(
-    \   s:get_using_inline_filetypes() +
-    \   g:markdown_codehl_onthefly#additional_fenced_languages)
+    call s:add_markdown_fenced_languages(
+    \   g:markdown_codehl_onthefly#additional_fenced_languages +
+    \   s:get_using_inline_langs())
     " Register auto-commands (buffer-local)
     augroup markdown_codehl_onthefly-buflocal
         autocmd!
@@ -82,14 +82,29 @@ endfunction
 
 " Set g:markdown_fenced_languages when entering markdown buffer.
 " @seealso s:restore_buflocal_markdown_fenced_languages()
-function! s:set_markdown_fenced_languages(langs) abort
-    let g:markdown_fenced_languages = copy(a:langs)
+function! s:add_markdown_fenced_languages(langs) abort
+    if !exists('g:markdown_fenced_languages')
+        let g:markdown_fenced_languages = []
+    endif
+    " 1. {lang}
+    " 2. {lang}=...
+    let added = 0
+    for lang in a:langs
+        let filetype = matchstr(lang, '^[^=]\+')
+        if filetype !=# '' &&
+        \   match(g:markdown_fenced_languages,
+        \       '^'.filetype.'\($\|=\)') ==# -1
+            let g:markdown_fenced_languages += [lang]
+            let added = 1
+        endif
+    endfor
     let b:markdown_codehl_onthefly_buflocal_markdown_fenced_languages =
-    \   copy(a:langs)
+    \   copy(g:markdown_fenced_languages)
+    return added
 endfunction
 
 " Set g:markdown_fenced_languages when entering markdown buffer.
-" @seealso s:set_markdown_fenced_languages()
+" @seealso s:add_markdown_fenced_languages()
 function! s:restore_buflocal_markdown_fenced_languages() abort
     if exists('b:markdown_codehl_onthefly_buflocal_markdown_fenced_languages')
         let g:markdown_fenced_languages =
@@ -105,18 +120,7 @@ function! s:syn_include_dynamically() abort
         let g:markdown_fenced_languages = []
     endif
     try
-        let added = 0
-        for filetype in s:get_using_inline_filetypes()
-            let group = 'markdownHighlight' . filetype
-            if match(g:markdown_fenced_languages,
-            \       '^'.filetype.'\($\|=\)') ==# -1
-                call s:set_markdown_fenced_languages(
-                \   g:markdown_fenced_languages + [filetype]
-                \)
-                let added = 1
-            endif
-        endfor
-        if added
+        if s:add_markdown_fenced_languages(s:get_using_inline_langs())
             syntax clear
             syntax enable
         endif
@@ -126,7 +130,7 @@ function! s:syn_include_dynamically() abort
 endfunction
 
 let s:RE_FILETYPE = '```\zs\w\+\ze'
-function! s:get_using_inline_filetypes() abort
+function! s:get_using_inline_langs() abort
     return map(filter(getline(1, '$'), 'v:val =~# s:RE_FILETYPE'),
     \         'matchstr(v:val, s:RE_FILETYPE)')
 endfunction
