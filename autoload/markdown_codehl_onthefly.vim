@@ -135,7 +135,7 @@ endfunction
 let s:RE_FILETYPE = '```\zs\w\+\ze'
 function! s:get_using_inline_langs() abort
     return map(filter(getline(1, '$'), 'v:val =~# s:RE_FILETYPE'),
-    \         'matchstr(v:val, s:RE_FILETYPE)')
+    \         'tolower(matchstr(v:val, s:RE_FILETYPE))')
 endfunction
 
 
