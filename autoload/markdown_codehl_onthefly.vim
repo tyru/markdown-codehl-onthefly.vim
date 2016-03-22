@@ -93,10 +93,12 @@ function! s:add_markdown_fenced_languages(langs) abort
     " 2. {lang}=...
     let added = 0
     for lang in a:langs
-        let filetype = matchstr(lang, '^[^=]\+')
-        if filetype !=# '' &&
+        let alias = matchstr(lang, '^[^=]\+')
+        let syntax = lang =~# '=' ? matchstr(lang, '=\zs.\+') : alias
+        if alias !=# '' &&
         \   match(g:markdown_fenced_languages,
-        \       '^'.filetype.'\($\|=\)') ==# -1
+        \       '^'.alias.'\($\|=\)') ==# -1 &&
+        \   globpath(&rtp, 'syntax/' . syntax . '.vim') !=# ''
             let g:markdown_fenced_languages += [lang]
             let added = 1
         endif
