@@ -18,7 +18,6 @@ if !exists('g:markdown_codehl_onthefly#additional_fenced_languages')
     \   ['rake', 'ruby'],
     \   ['rb', 'ruby'],
     \   ['rbx', 'ruby'],
-    \   ['json', 'javascript'],
     \   ['js', 'javascript'],
     \   ['node', 'javascript'],
     \]
