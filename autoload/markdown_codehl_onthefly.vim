@@ -3,10 +3,8 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 
-if !exists('g:markdown_codehl_onthefly#additional_fenced_languages')
-  let g:markdown_codehl_onthefly#additional_fenced_languages = []
-  " From linguist's languages.yml
-  " https://github.com/github/linguist/blob/master/lib/linguist/languages.yml
+function! markdown_codehl_onthefly#get_default_fenced_languages() abort
+  let langs = []
   for [alias, to] in [
   \   ['viml', 'vim'],
   \   ['nvim', 'vim'],
@@ -21,13 +19,23 @@ if !exists('g:markdown_codehl_onthefly#additional_fenced_languages')
   \   ['js', 'javascript'],
   \   ['node', 'javascript'],
   \]
-    " If <alias>.vim is not installed, add to additional languages.
-    if globpath(&rtp, 'syntax/' . alias . '.vim') ==# ''
-      let g:markdown_codehl_onthefly#additional_fenced_languages +=
-      \   [alias . '=' . to]
-    endif
+    let langs += [alias . '=' . to]
   endfor
+  return langs
+endfunction
+
+if !exists('g:markdown_codehl_onthefly#additional_fenced_languages') ||
+\   type(g:markdown_codehl_onthefly#additional_fenced_languages) isnot# type([])
+  let g:markdown_codehl_onthefly#additional_fenced_languages =
+  \     markdown_codehl_onthefly#get_default_fenced_languages()
 endif
+
+function! s:init() abort
+  " From linguist's languages.yml
+  " https://github.com/github/linguist/blob/master/lib/linguist/languages.yml
+endfunction
+call s:init()
+
 
 let s:NONE = []
 let s:do_syn_include_after = 0
