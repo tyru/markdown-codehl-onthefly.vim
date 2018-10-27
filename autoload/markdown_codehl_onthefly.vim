@@ -100,6 +100,10 @@ function! s:add_markdown_fenced_languages(langs) abort
   " 2. {lang}=...
   let added = 0
   for lang in a:langs
+    if lang ==# 'markdown'
+      " Avoid infinite loop. Including itself causes infinite recursion.
+      continue
+    endif
     let alias = matchstr(lang, '^[^=]\+')
     let syntax = lang =~# '=' ? matchstr(lang, '=\zs.\+') : alias
     if alias !=# '' &&
