@@ -30,6 +30,11 @@ if !exists('g:markdown_codehl_onthefly#additional_fenced_languages') ||
   \     markdown_codehl_onthefly#get_default_fenced_languages()
 endif
 
+if !exists('g:markdown_codehl_onthefly#filetype_blacklist') ||
+\   type(g:markdown_codehl_onthefly#filetype_blacklist) isnot# type([])
+  let g:markdown_codehl_onthefly#filetype_blacklist = []
+endif
+
 function! s:init() abort
   " From linguist's languages.yml
   " https://github.com/github/linguist/blob/master/lib/linguist/languages.yml
@@ -143,8 +148,12 @@ endfunction
 
 let s:RE_FILETYPE = '```\zs\w\+\ze'
 function! s:get_using_inline_langs() abort
-  return map(filter(getline(1, '$'), 'v:val =~# s:RE_FILETYPE'),
+  let langs = map(filter(getline(1, '$'), 'v:val =~# s:RE_FILETYPE'),
   \         'tolower(matchstr(v:val, s:RE_FILETYPE))')
+  if g:markdown_codehl_onthefly#filetype_blacklist !=# []
+    call filter(langs, 'index(g:markdown_codehl_onthefly#filetype_blacklist, v:val) == -1')
+  endif
+  return langs
 endfunction
 
 
